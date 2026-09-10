@@ -40,6 +40,72 @@ class FarmerViewSet(viewsets.ModelViewSet):
         except:
             return Farmer.objects.none()
 
+    @action(detail=True, methods=['get'])
+    def lifetime_history(self, request, pk=None):
+        farmer = self.get_object()
+        
+        # Match purchase records by KK ID or Farmer Name
+        from django.db.models import Q
+        records = PurchaseRecord.objects.filter(
+            Q(kk_id=farmer.kk_id_num) | Q(farmer_name__iexact=farmer.name)
+        ).select_related('session').order_by('-date')
+
+        total_kilos = sum(r.kilos for r in records) or (farmer.volume or 0)
+        total_bags = round(total_kilos / 62.5, 2)
+        total_amount = sum(r.amount_ghc for r in records) or (total_kilos * 50)
+        bonus_entitled = round(total_kilos * 1.12, 2)
+        
+        field_size = farmer.field_size or 0
+        yield_per_hectare = round(total_kilos / field_size, 2) if field_size > 0 else 0
+
+        # Group by Cocoa Season
+        seasons_dict = {}
+        records_list = []
+
+        for r in records:
+            season = r.session.cocoa_season if r.session else '2025/2026'
+            if season not in seasons_dict:
+                seasons_dict[season] = {
+                    'season': season,
+                    'kilos': 0,
+                    'bags': 0,
+                    'amount': 0,
+                    'bonus': 0,
+                    'count': 0
+                }
+            seasons_dict[season]['kilos'] += r.kilos
+            seasons_dict[season]['bags'] = round(seasons_dict[season]['kilos'] / 62.5, 2)
+            seasons_dict[season]['amount'] += r.amount_ghc
+            seasons_dict[season]['bonus'] = round(seasons_dict[season]['kilos'] * 1.12, 2)
+            seasons_dict[season]['count'] += 1
+
+            records_list.append({
+                'id': r.id,
+                'date': str(r.date),
+                'session_id': r.session.id if r.session else None,
+                'waybill_no': r.session.waybill_no if r.session else '—',
+                'season': season,
+                'society': r.session.society_district_name if r.session else farmer.society,
+                'kilos': r.kilos,
+                'bags': round(r.kilos / 62.5, 2),
+                'amount_ghc': r.amount_ghc,
+                'bonus_ghc': round(r.kilos * 1.12, 2)
+            })
+
+        return Response({
+            'farmer': FarmerSerializer(farmer).data,
+            'summary': {
+                'total_kilos': round(total_kilos, 2),
+                'total_bags': total_bags,
+                'total_amount_ghc': round(total_amount, 2),
+                'bonus_entitled': bonus_entitled,
+                'yield_per_hectare': yield_per_hectare,
+                'total_transactions': len(records_list)
+            },
+            'seasons_breakdown': list(seasons_dict.values()),
+            'records': records_list
+        })
+
     @action(detail=False, methods=['post'])
     def import_excel(self, request):
         file = request.FILES.get('file')
@@ -116,3 +182,4 @@ class FarmerViewSet(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

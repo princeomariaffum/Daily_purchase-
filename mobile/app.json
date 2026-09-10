@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Kuapa Kokoo",
+    "slug": "kuapa-kokoo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "kuapa",
+    "userInterfaceStyle": "light",
+    "sdkVersion": "54.0.0",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#4a2511"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.kingdosty_1.kuapakokoo"
+    },
+    "ios": {
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app captures GPS coordinates when recording cocoa purchases."
+      }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Kuapa Kokoo to use your location to tag cocoa purchase sessions."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "940fdc39-6790-4fdb-85b2-542f0a7d8833"
+      }
+    }
+  }
+}

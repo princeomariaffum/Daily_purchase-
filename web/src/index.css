@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #4a2511;
+  --color-brand-light: #8b5a2b;
+  --color-accent: #f0c330;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #f8f6f4;
+}
+
+/* Premium card hover lift animation */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(74, 37, 17, 0.12);
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeInUp 0.4s ease both;
+}
+
+/* Season Fade Transition - Slow, Silky & Premium */
+@keyframes seasonFade {
+  0% {
+    opacity: 0.05;
+    transform: translateY(8px) scale(0.992);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+.season-transition {
+  animation: seasonFade 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Smooth theme property transitions - 0.85s */
+.theme-transition {
+  transition: background 0.85s cubic-bezier(0.22, 1, 0.36, 1), 
+              border-color 0.85s cubic-bezier(0.22, 1, 0.36, 1), 
+              color 0.75s cubic-bezier(0.22, 1, 0.36, 1), 
+              box-shadow 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Staggered children */
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+
+/* Modal Popup Fade In & Out Animations */
+@keyframes modalBackdropFadeIn {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(6px); }
+}
+
+@keyframes modalBackdropFadeOut {
+  from { opacity: 1; backdrop-filter: blur(6px); }
+  to   { opacity: 0; backdrop-filter: blur(0px); }
+}
+
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-24px);
+    filter: blur(8px);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.005) translateY(3px);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes modalPopOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-16px);
+    filter: blur(6px);
+  }
+}
+
+
+.modal-backdrop-in {
+  animation: modalBackdropFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.modal-backdrop-out {
+  animation: modalBackdropFadeOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-pop-in {
+  animation: modalPopIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.modal-pop-out {
+  animation: modalPopOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
