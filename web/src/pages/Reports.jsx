@@ -7,6 +7,7 @@ import { TrendingUp, Users, DollarSign, Package, Award, FileText, Download, BarC
 import { exportBonusReport, exportSocietyBonusReport } from '../utils/exportBonusReport';
 import { exportSocietyBonusPdf, exportZoneBonusPdf } from '../utils/exportPdfReport';
 import { SocietyComparisonBarChart, ZoneBreakdownBarChart } from '../components/Charts';
+import { API_URL } from '../config';
 
 export default function Reports() {
   const { token } = useAuth();
@@ -24,9 +25,10 @@ export default function Reports() {
     setLoading(true);
     try {
       const [resSess, resRec] = await Promise.all([
-        axios.get('http://localhost:8000/api/sessions/', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:8000/api/records/', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_URL}/sessions/`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/records/`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
+
       setAllSessions(resSess.data);
       setAllRecords(resRec.data);
     } catch (e) {

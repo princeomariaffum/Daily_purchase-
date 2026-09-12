@@ -1,0 +1,2 @@
+// Dynamic Network API Configuration for Web
+export const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000/api`;

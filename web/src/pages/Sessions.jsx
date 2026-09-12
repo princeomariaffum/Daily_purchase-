@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSeason } from '../contexts/SeasonContext';
 import { exportSessionsToExcel } from '../utils/exportExcel';
 import { Download, FileText, ChevronDown, ChevronRight, Package } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function Sessions() {
   const { token } = useAuth();
@@ -16,9 +17,10 @@ export default function Sessions() {
   const fetchSessions = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:8000/api/sessions/', {
+      const res = await axios.get(`${API_URL}/sessions/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       setAllSessions(res.data);
     } catch (e) {
       console.error(e);

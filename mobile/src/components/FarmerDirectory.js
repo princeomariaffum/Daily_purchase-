@@ -5,10 +5,10 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
-
-const API_URL = 'http://localhost:8000/api';
+import { API_URL } from '../config';
 
 export default function FarmerDirectory({ onSelectFarmerForPurchase, theme }) {
+
   const [farmers, setFarmers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

@@ -3,8 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityInd
 import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API_URL = 'http://192.168.210.31:8000/api/token/';
+import { API_URL } from '../config';
 
 export default function LoginScreen({ onLoginSuccess, onGuestLogin, theme }) {
   const styles = getStyles(theme);
@@ -20,7 +19,7 @@ export default function LoginScreen({ onLoginSuccess, onGuestLogin, theme }) {
     
     setLoading(true);
     try {
-      const response = await axios.post(API_URL, { username, password });
+      const response = await axios.post(`${API_URL}/token/`, { username, password });
       await AsyncStorage.setItem('@jwt_token', response.data.access);
       await AsyncStorage.removeItem('@is_guest');
       onLoginSuccess();

@@ -3,14 +3,62 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
+from django.db.models import Q
 import pandas as pd
 from django.contrib.auth.models import User
-from .models import PurchaseSession, PurchaseRecord, Farmer
-from .serializers import PurchaseSessionSerializer, PurchaseRecordSerializer, FarmerSerializer, UserSerializer
+from .models import (
+    Region, District, Zone, OfficerSociety, Farmer, Farm, Season, 
+    Delivery, DeliveryUpdate, PurchaseSession, PurchaseRecord
+)
+from .serializers import (
+    RegionSerializer, DistrictSerializer, ZoneSerializer, OfficerSocietySerializer,
+    FarmerSerializer, FarmSerializer, SeasonSerializer, DeliverySerializer,
+    DeliveryUpdateSerializer, PurchaseSessionSerializer, PurchaseRecordSerializer, UserSerializer
+)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('username')
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+class RegionViewSet(viewsets.ModelViewSet):
+    queryset = Region.objects.all().order_by('region_name')
+    serializer_class = RegionSerializer
+    permission_classes = [IsAuthenticated]
+
+class DistrictViewSet(viewsets.ModelViewSet):
+    queryset = District.objects.all().order_by('district_name')
+    serializer_class = DistrictSerializer
+    permission_classes = [IsAuthenticated]
+
+class ZoneViewSet(viewsets.ModelViewSet):
+    queryset = Zone.objects.all().order_by('zone_name')
+    serializer_class = ZoneSerializer
+    permission_classes = [IsAuthenticated]
+
+class OfficerSocietyViewSet(viewsets.ModelViewSet):
+    queryset = OfficerSociety.objects.all().order_by('-assigned_at')
+    serializer_class = OfficerSocietySerializer
+    permission_classes = [IsAuthenticated]
+
+class SeasonViewSet(viewsets.ModelViewSet):
+    queryset = Season.objects.all().order_by('-start_at')
+    serializer_class = SeasonSerializer
+    permission_classes = [IsAuthenticated]
+
+class FarmViewSet(viewsets.ModelViewSet):
+    queryset = Farm.objects.all().order_by('-created_at')
+    serializer_class = FarmSerializer
+    permission_classes = [IsAuthenticated]
+
+class DeliveryViewSet(viewsets.ModelViewSet):
+    queryset = Delivery.objects.all().order_by('-delivery_date')
+    serializer_class = DeliverySerializer
+    permission_classes = [IsAuthenticated]
+
+class DeliveryUpdateViewSet(viewsets.ModelViewSet):
+    queryset = DeliveryUpdate.objects.all().order_by('-updated_at')
+    serializer_class = DeliveryUpdateSerializer
     permission_classes = [IsAuthenticated]
 
 class PurchaseSessionViewSet(viewsets.ModelViewSet):
@@ -35,62 +83,105 @@ class FarmerViewSet(viewsets.ModelViewSet):
         try:
             profile = user.fieldagentprofile
             if profile.assigned_societies:
-                return Farmer.objects.filter(society__in=profile.assigned_societies).order_by('name')
+                return Farmer.objects.filter(
+                    Q(society__in=profile.assigned_societies) | Q(district_society__district_name__in=profile.assigned_societies)
+                ).order_by('name')
             return Farmer.objects.none()
-        except:
+        except Exception:
             return Farmer.objects.none()
 
     @action(detail=True, methods=['get'])
     def lifetime_history(self, request, pk=None):
         farmer = self.get_object()
         
-        # Match purchase records by KK ID or Farmer Name
-        from django.db.models import Q
+        # Match deliveries by FK or KK ID or Name
+        deliveries = Delivery.objects.filter(
+            Q(farmer=farmer) | Q(farmer__cocobod_id=farmer.cocobod_id) | Q(farmer__kk_id_num=farmer.kk_id_num)
+        ).select_related('season', 'farm').order_by('-delivery_date')
+
+        # Also match legacy PurchaseRecords
         records = PurchaseRecord.objects.filter(
             Q(kk_id=farmer.kk_id_num) | Q(farmer_name__iexact=farmer.name)
         ).select_related('session').order_by('-date')
 
-        total_kilos = sum(r.kilos for r in records) or (farmer.volume or 0)
-        total_bags = round(total_kilos / 62.5, 2)
-        total_amount = sum(r.amount_ghc for r in records) or (total_kilos * 50)
-        bonus_entitled = round(total_kilos * 1.12, 2)
-        
-        field_size = farmer.field_size or 0
-        yield_per_hectare = round(total_kilos / field_size, 2) if field_size > 0 else 0
-
-        # Group by Cocoa Season
         seasons_dict = {}
         records_list = []
 
-        for r in records:
-            season = r.session.cocoa_season if r.session else '2025/2026'
-            if season not in seasons_dict:
-                seasons_dict[season] = {
-                    'season': season,
-                    'kilos': 0,
-                    'bags': 0,
-                    'amount': 0,
-                    'bonus': 0,
+        # Process Deliveries (New ERD Schema)
+        for d in deliveries:
+            season_str = d.season.season_name if d.season else '2025/2026'
+            if season_str not in seasons_dict:
+                seasons_dict[season_str] = {
+                    'season': season_str,
+                    'kilos': 0.0,
+                    'bags': 0.0,
+                    'amount': 0.0,
+                    'bonus': 0.0,
                     'count': 0
                 }
-            seasons_dict[season]['kilos'] += r.kilos
-            seasons_dict[season]['bags'] = round(seasons_dict[season]['kilos'] / 62.5, 2)
-            seasons_dict[season]['amount'] += r.amount_ghc
-            seasons_dict[season]['bonus'] = round(seasons_dict[season]['kilos'] * 1.12, 2)
-            seasons_dict[season]['count'] += 1
+            kilos = d.volume_delivered_kilos or 0.0
+            bags = d.volume_delivered_bags or round(kilos / 62.5, 2)
+            amount = d.amount_ghc
+            bonus = round(kilos * 1.12, 2)
+
+            seasons_dict[season_str]['kilos'] += kilos
+            seasons_dict[season_str]['bags'] = round(seasons_dict[season_str]['kilos'] / 62.5, 2)
+            seasons_dict[season_str]['amount'] += amount
+            seasons_dict[season_str]['bonus'] = round(seasons_dict[season_str]['kilos'] * 1.12, 2)
+            seasons_dict[season_str]['count'] += 1
 
             records_list.append({
-                'id': r.id,
-                'date': str(r.date),
-                'session_id': r.session.id if r.session else None,
-                'waybill_no': r.session.waybill_no if r.session else '—',
-                'season': season,
-                'society': r.session.society_district_name if r.session else farmer.society,
-                'kilos': r.kilos,
-                'bags': round(r.kilos / 62.5, 2),
-                'amount_ghc': r.amount_ghc,
-                'bonus_ghc': round(r.kilos * 1.12, 2)
+                'id': f"DEL-{d.delivery_id}",
+                'date': str(d.delivery_date),
+                'session_id': d.delivery_id,
+                'waybill_no': d.waybill_number or '—',
+                'season': season_str,
+                'society': farmer.district_society.district_name if farmer.district_society else (farmer.society or '—'),
+                'kilos': kilos,
+                'bags': bags,
+                'amount_ghc': amount,
+                'bonus_ghc': bonus
             })
+
+        # Process legacy PurchaseRecords if no deliveries or in addition
+        if not deliveries.exists():
+            for r in records:
+                season_str = r.session.cocoa_season if r.session else '2025/2026'
+                if season_str not in seasons_dict:
+                    seasons_dict[season_str] = {
+                        'season': season_str,
+                        'kilos': 0.0,
+                        'bags': 0.0,
+                        'amount': 0.0,
+                        'bonus': 0.0,
+                        'count': 0
+                    }
+                seasons_dict[season_str]['kilos'] += r.kilos
+                seasons_dict[season_str]['bags'] = round(seasons_dict[season_str]['kilos'] / 62.5, 2)
+                seasons_dict[season_str]['amount'] += r.amount_ghc
+                seasons_dict[season_str]['bonus'] = round(seasons_dict[season_str]['kilos'] * 1.12, 2)
+                seasons_dict[season_str]['count'] += 1
+
+                records_list.append({
+                    'id': f"REC-{r.id}",
+                    'date': str(r.date),
+                    'session_id': r.session.id if r.session else None,
+                    'waybill_no': r.session.waybill_no if r.session else '—',
+                    'season': season_str,
+                    'society': r.session.society_district_name if r.session else (farmer.society or '—'),
+                    'kilos': r.kilos,
+                    'bags': round(r.kilos / 62.5, 2),
+                    'amount_ghc': r.amount_ghc,
+                    'bonus_ghc': round(r.kilos * 1.12, 2)
+                })
+
+        total_kilos = sum(s['kilos'] for s in seasons_dict.values()) or (farmer.volume or 0)
+        total_bags = round(total_kilos / 62.5, 2)
+        total_amount = sum(s['amount'] for s in seasons_dict.values()) or (total_kilos * 52.0)
+        bonus_entitled = round(total_kilos * 1.12, 2)
+        
+        field_size = farmer.actual_farm_size or farmer.field_size or 0
+        yield_per_hectare = round(total_kilos / field_size, 2) if field_size > 0 else 0
 
         return Response({
             'farmer': FarmerSerializer(farmer).data,
@@ -114,7 +205,6 @@ class FarmerViewSet(viewsets.ModelViewSet):
         
         try:
             df = pd.read_excel(file)
-            # Normalize column names by replacing spaces and lowercasing
             df.columns = [str(col).strip().lower() for col in df.columns]
             
             created_count = 0
@@ -128,18 +218,39 @@ class FarmerViewSet(viewsets.ModelViewSet):
                             return None
                         return str(val).strip()
 
-                    kk_id = safe_get('kkidnum')
+                    kk_id = safe_get('kkidnum') or safe_get('cocobod_id') or safe_get('farmer_id')
                     if not kk_id:
                         continue
+
+                    dist_name = safe_get('society') or safe_get('depot') or safe_get('district')
+                    district_obj = None
+                    if dist_name:
+                        district_obj, _ = District.objects.get_or_create(district_name=dist_name)
+
+                    zone_name = safe_get('zone')
+                    station_mark = safe_get('societiesstationmark') or safe_get('station_mark')
+                    zone_obj = None
+                    if zone_name or station_mark:
+                        s_mark = station_mark or f"ST-{zone_name[:4].upper()}" if zone_name else "ST-001"
+                        zone_obj, _ = Zone.objects.get_or_create(
+                            station_mark=s_mark,
+                            defaults={'zone_name': zone_name or s_mark, 'district': district_obj}
+                        )
                         
                     defaults = {
-                        'society': safe_get('society') or safe_get('depot'),
-                        'zone': safe_get('zone'),
-                        'station_mark': safe_get('societiesstationmark'),
-                        'name': safe_get('member') or 'Unknown Farmer',
+                        'society': dist_name,
+                        'zone': zone_name,
+                        'station_mark': station_mark,
+                        'district_society': district_obj,
+                        'zone_fk': zone_obj,
+                        'name': safe_get('member') or safe_get('first_name') or 'Unknown Farmer',
                         'gender': safe_get('gender'),
-                        'phone_numbers': safe_get('phonenumbers'),
-                        'id_card_number': safe_get('idcardnumber'),
+                        'phone_numbers': safe_get('phonenumbers') or safe_get('contact'),
+                        'contact': safe_get('phonenumbers') or safe_get('contact'),
+                        'id_card_number': safe_get('idcardnumber') or safe_get('gh_card'),
+                        'gh_card': safe_get('idcardnumber') or safe_get('gh_card'),
+                        'cocobod_id': kk_id,
+                        'farmer_id': kk_id,
                     }
                     
                     try:
@@ -149,8 +260,9 @@ class FarmerViewSet(viewsets.ModelViewSet):
                         defaults['year_of_birth'] = None
                         
                     try:
-                        fsize = row.get('fieldsize')
+                        fsize = row.get('fieldsize') or row.get('actual_farm_size')
                         defaults['field_size'] = float(fsize) if pd.notna(fsize) else None
+                        defaults['actual_farm_size'] = defaults['field_size']
                     except (ValueError, TypeError):
                         defaults['field_size'] = None
                         
@@ -182,4 +294,3 @@ class FarmerViewSet(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-

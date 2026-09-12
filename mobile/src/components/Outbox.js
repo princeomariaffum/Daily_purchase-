@@ -4,10 +4,10 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { getOutbox, removeSessionFromOutbox, saveFarmersToLocal, getLocalFarmers } from '../utils/storage';
-
-const API_URL = 'http://192.168.210.31:8000/api'; 
+import { API_URL } from '../config';
 
 export default function Outbox({ theme }) {
+
   const styles = getStyles(theme);
   const [outbox, setOutbox] = useState([]);
   const [syncing, setSyncing] = useState(false);

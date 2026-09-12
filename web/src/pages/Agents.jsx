@@ -3,6 +3,7 @@ import axios from 'axios';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { Plus, Edit2, Shield, User } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function Agents() {
   const { token } = useAuth();
@@ -19,7 +20,7 @@ export default function Agents() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:8000/api/users/', {
+      const res = await axios.get(`${API_URL}/users/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -46,11 +47,11 @@ export default function Agents() {
 
     try {
       if (editUser) {
-        await axios.patch(`http://localhost:8000/api/users/${editUser.id}/`, payload, {
+        await axios.patch(`${API_URL}/users/${editUser.id}/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('http://localhost:8000/api/users/', payload, {
+        await axios.post(`${API_URL}/users/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }

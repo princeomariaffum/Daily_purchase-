@@ -6,8 +6,8 @@ import { exportSessionsToExcel } from '../utils/exportExcel';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useSeason } from '../contexts/SeasonContext';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:8000/api';
 
 function formatCurrency(n) {
   return `₵${(n || 0).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

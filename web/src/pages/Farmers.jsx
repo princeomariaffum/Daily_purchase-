@@ -10,8 +10,8 @@ import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useSeason } from '../contexts/SeasonContext';
 import { exportFarmerStatementPdf } from '../utils/exportFarmerStatement';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:8000/api';
 
 export default function Farmers() {
   const [farmers, setFarmers] = useState([]);
