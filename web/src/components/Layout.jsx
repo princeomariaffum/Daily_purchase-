@@ -1,17 +1,18 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, Users, FileText,
+  LayoutDashboard, Package, Users, FileText, MapPin,
   LogOut, RefreshCw, Sparkles, Calendar
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSeason } from '../contexts/SeasonContext';
 
 const NAV_ITEMS = [
-  { icon: <LayoutDashboard size={18}/>, label: 'Dashboard', path: '/' },
-  { icon: <FileText size={18}/>,        label: 'Sessions',  path: '/sessions' },
-  { icon: <Users size={18}/>,           label: 'Farmers',   path: '/farmers' },
-  { icon: <Users size={18}/>,           label: 'Agents',    path: '/agents' },
-  { icon: <Package size={18}/>,         label: 'Reports',   path: '/reports' },
+  { icon: <LayoutDashboard size={18}/>, label: 'Dashboard',       path: '/' },
+  { icon: <FileText size={18}/>,        label: 'Sessions',        path: '/sessions' },
+  { icon: <Users size={18}/>,           label: 'Farmers',         path: '/farmers' },
+  { icon: <MapPin size={18}/>,          label: 'Farms & Mapping', path: '/farms' },
+  { icon: <Users size={18}/>,           label: 'Agents',          path: '/agents' },
+  { icon: <Package size={18}/>,         label: 'Reports',         path: '/reports' },
 ];
 
 export default function Layout({ children, title, onRefresh }) {

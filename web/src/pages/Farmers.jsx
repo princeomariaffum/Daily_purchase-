@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSeason } from '../contexts/SeasonContext';
 import { exportFarmerStatementPdf } from '../utils/exportFarmerStatement';
 import { API_URL } from '../config';
+import FarmMapModal from '../components/FarmMapModal';
 
 
 export default function Farmers() {
@@ -26,6 +27,7 @@ export default function Farmers() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'seasons' | 'ledger'
   const [isProfileClosing, setIsProfileClosing] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   // Modals state for Add / Edit
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -656,10 +658,41 @@ export default function Farmers() {
                               {selectedFarmer.station_mark || 'N/A'}
                             </span>
                           </div>
+
+                          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                            <button
+                              onClick={() => setIsMapModalOpen(true)}
+                              style={{
+                                width: '100%',
+                                padding: '10px 14px',
+                                background: currentTheme.badgeBg,
+                                border: `1px solid ${currentTheme.badgeBorderColor}`,
+                                borderRadius: 10,
+                                color: currentTheme.primary,
+                                fontWeight: 700,
+                                fontSize: 13,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 8
+                              }}
+                            >
+                              <MapPin size={16} /> View GPS Farm Map 🗺️
+                            </button>
+                          </div>
                         </div>
                       </div>
 
                     </div>
+                  )}
+
+                  {/* Render FarmMapModal inside profile */}
+                  {isMapModalOpen && selectedFarmer && (
+                    <FarmMapModal 
+                      farmer={selectedFarmer}
+                      onClose={() => setIsMapModalOpen(false)}
+                    />
                   )}
 
                   {/* TAB 2: SEASON BREAKDOWN */}

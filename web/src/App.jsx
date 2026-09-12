@@ -4,6 +4,7 @@ import { SeasonProvider } from './contexts/SeasonContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Farmers from './pages/Farmers';
+import Farms from './pages/Farms';
 import Agents from './pages/Agents';
 import Sessions from './pages/Sessions';
 import Reports from './pages/Reports';
@@ -31,6 +32,11 @@ function App() {
               <Farmers />
             </ProtectedRoute>
           } />
+          <Route path="/farms" element={
+            <ProtectedRoute>
+              <Farms />
+            </ProtectedRoute>
+          } />
           <Route path="/agents" element={
             <ProtectedRoute>
               <Agents />
@@ -55,4 +61,3 @@ function App() {
 }
 
 export default App;
-
