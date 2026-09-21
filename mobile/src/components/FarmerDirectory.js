@@ -6,6 +6,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { API_URL } from '../config';
+import { getLocalFarmers } from '../utils/storage';
 
 export default function FarmerDirectory({ onSelectFarmerForPurchase, theme }) {
 
@@ -27,9 +28,14 @@ export default function FarmerDirectory({ onSelectFarmerForPurchase, theme }) {
       if (res.ok) {
         const data = await res.json();
         setFarmers(data);
+      } else {
+        const cached = await getLocalFarmers();
+        setFarmers(cached);
       }
     } catch (e) {
-      console.log('Error fetching mobile farmers directory:', e);
+      console.log('Error fetching mobile farmers directory, fallback to cached:', e);
+      const cached = await getLocalFarmers();
+      setFarmers(cached);
     } finally {
       setLoading(false);
     }

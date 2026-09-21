@@ -53,11 +53,65 @@ export const removeSessionFromOutbox = async (localId) => {
   }
 };
 
-const FARMERS_KEY = '@kuapa_kokoo_farmers';
+// Farmers Chunked Storage Constants
+const FARMERS_META_KEY = '@kuapa_kokoo_farmers_meta';
+const FARMERS_CHUNK_PREFIX = '@kuapa_kokoo_farmers_chunk_';
+const CHUNK_SIZE = 150; // Keeps each row well under 2MB CursorWindow limit
 
 export const saveFarmersToLocal = async (farmers) => {
   try {
-    await AsyncStorage.setItem(FARMERS_KEY, JSON.stringify(farmers));
+    if (!Array.isArray(farmers)) return;
+
+    // 1. Sanitize farmer objects to keep offline payload size small & performant
+    const sanitizedFarmers = farmers.map(f => ({
+      id: f.id,
+      farmer_id: f.farmer_id || f.cocobod_id || f.kk_id_num,
+      name: (f.name || `${f.first_name || ''} ${f.last_name || ''}`).trim(),
+      first_name: f.first_name || '',
+      last_name: f.last_name || '',
+      cocobod_id: f.cocobod_id || f.kk_id_num || f.farmer_id || '',
+      kk_id_num: f.kk_id_num || f.cocobod_id || f.farmer_id || '',
+      contact: f.contact || f.phone_numbers || '',
+      actual_farm_size: f.actual_farm_size || f.field_size || 0,
+      society: f.society || f.district_name || '',
+      zone: f.zone || f.zone_name_str || '',
+    }));
+
+    // 2. Clean up old chunks if any exist
+    const oldMetaStr = await AsyncStorage.getItem(FARMERS_META_KEY);
+    if (oldMetaStr) {
+      try {
+        const oldMeta = JSON.parse(oldMetaStr);
+        const oldKeys = Array.from({ length: oldMeta.chunkCount }, (_, i) => `${FARMERS_CHUNK_PREFIX}${i}`);
+        await AsyncStorage.multiRemove(oldKeys);
+      } catch (err) {
+        // ignore cleanup error
+      }
+    }
+    // Remove legacy monolithic key if present
+    await AsyncStorage.removeItem('@kuapa_kokoo_farmers').catch(() => {});
+
+    // 3. Chunk farmers array
+    const chunks = [];
+    for (let i = 0; i < sanitizedFarmers.length; i += CHUNK_SIZE) {
+      chunks.push(sanitizedFarmers.slice(i, i + CHUNK_SIZE));
+    }
+
+    // 4. Save chunks via multiSet
+    const keyValuePairs = chunks.map((chunk, index) => [
+      `${FARMERS_CHUNK_PREFIX}${index}`,
+      JSON.stringify(chunk)
+    ]);
+
+    await AsyncStorage.multiSet(keyValuePairs);
+
+    // 5. Save metadata
+    await AsyncStorage.setItem(FARMERS_META_KEY, JSON.stringify({
+      chunkCount: chunks.length,
+      totalFarmers: sanitizedFarmers.length,
+      updatedAt: new Date().toISOString()
+    }));
+
   } catch (e) {
     console.error("Error saving farmers to local", e);
     throw e;
@@ -66,8 +120,32 @@ export const saveFarmersToLocal = async (farmers) => {
 
 export const getLocalFarmers = async () => {
   try {
-    const existing = await AsyncStorage.getItem(FARMERS_KEY);
-    return existing ? JSON.parse(existing) : [];
+    const metaStr = await AsyncStorage.getItem(FARMERS_META_KEY);
+    if (!metaStr) {
+      // Legacy single key fallback
+      try {
+        const legacyStr = await AsyncStorage.getItem('@kuapa_kokoo_farmers');
+        return legacyStr ? JSON.parse(legacyStr) : [];
+      } catch (legacyErr) {
+        console.warn("Legacy farmers fetch failed or row too big:", legacyErr);
+        return [];
+      }
+    }
+
+    const meta = JSON.parse(metaStr);
+    const chunkKeys = Array.from({ length: meta.chunkCount }, (_, i) => `${FARMERS_CHUNK_PREFIX}${i}`);
+    
+    const results = await AsyncStorage.multiGet(chunkKeys);
+    let allFarmers = [];
+
+    for (const [key, value] of results) {
+      if (value) {
+        const chunk = JSON.parse(value);
+        allFarmers.push(...chunk);
+      }
+    }
+
+    return allFarmers;
   } catch (e) {
     console.error("Error getting local farmers", e);
     return [];

@@ -24,7 +24,11 @@ export default function LoginScreen({ onLoginSuccess, onGuestLogin, theme }) {
       await AsyncStorage.removeItem('@is_guest');
       onLoginSuccess();
     } catch (e) {
-      Alert.alert("Login Failed", "Invalid credentials or network error.");
+      if (!e.response) {
+        Alert.alert("Network Error", `Cannot connect to server at ${API_URL}. Ensure your phone is connected to the same Wi-Fi network.`);
+      } else {
+        Alert.alert("Login Failed", "Invalid credentials. Please check your username and password.");
+      }
     } finally {
       setLoading(false);
     }
