@@ -134,7 +134,18 @@ class PurchaseSessionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         records_data = validated_data.pop('records', [])
-        session = PurchaseSession.objects.create(**validated_data)
+        client_id = validated_data.get('client_id')
+        
+        if client_id:
+            session, created = PurchaseSession.objects.get_or_create(
+                client_id=client_id,
+                defaults=validated_data
+            )
+            if not created:
+                return session
+        else:
+            session = PurchaseSession.objects.create(**validated_data)
+            
         for record_data in records_data:
             PurchaseRecord.objects.create(session=session, **record_data)
         return session

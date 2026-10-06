@@ -13,7 +13,6 @@ export default function Outbox({ theme }) {
   const [syncing, setSyncing] = useState(false);
   const [downloadingFarmers, setDownloadingFarmers] = useState(false);
   const [localFarmersCount, setLocalFarmersCount] = useState(0);
-
   const loadOutbox = async () => {
     const data = await getOutbox();
     setOutbox(data);
@@ -60,23 +59,23 @@ export default function Outbox({ theme }) {
       Alert.alert("Login Required to Sync", "You collected this data in Guest mode. Please tap 'LOG IN' in the top right to sign in and upload your pending outbox records.");
       return;
     }
-    
+
     setSyncing(true);
     let successCount = 0;
-    
+
     for (const session of outbox) {
       try {
         const payload = { ...session };
         delete payload.local_id;
         delete payload.saved_at;
-        
+
         if (payload.records) {
           payload.records = payload.records.map(r => ({
             ...r,
             date: r.date || new Date().toISOString().split('T')[0]
           }));
         }
-        
+
         await axios.post(`${API_URL}/sessions/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -99,10 +98,10 @@ export default function Outbox({ theme }) {
         }
       }
     }
-    
+
     setSyncing(false);
     loadOutbox();
-    
+
     if (successCount === outbox.length) {
       Alert.alert("Sync Complete", "All sessions successfully sent to the server!");
     } else {
@@ -124,7 +123,7 @@ export default function Outbox({ theme }) {
             <Text style={{ fontWeight: '800', fontSize: 15, color: theme.textPrimary }}>Offline Farmers DB</Text>
             <Text style={{ color: theme.textSecondary, fontSize: 13 }}>{localFarmersCount} farmers cached locally</Text>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={{ backgroundColor: theme.primaryLight, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
             onPress={handleSyncFarmers}
             disabled={downloadingFarmers}
@@ -140,7 +139,7 @@ export default function Outbox({ theme }) {
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <View style={styles.headerRow}>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{outbox.length}</Text>
@@ -186,9 +185,9 @@ export default function Outbox({ theme }) {
         }
       />
 
-      <TouchableOpacity 
-        style={[styles.syncBtn, (outbox.length === 0 || syncing) && styles.syncBtnDisabled]} 
-        onPress={handleSync} 
+      <TouchableOpacity
+        style={[styles.syncBtn, (outbox.length === 0 || syncing) && styles.syncBtnDisabled]}
+        onPress={handleSync}
         disabled={outbox.length === 0 || syncing}
         activeOpacity={0.8}
       >
@@ -210,13 +209,13 @@ const getStyles = (theme) => StyleSheet.create({
   refreshText: { color: theme.primaryLight, fontWeight: '700', fontSize: 13 },
   syncingBanner: { flexDirection: 'row', backgroundColor: theme.primaryLight, padding: 12, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   syncingText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  card: { 
+  card: {
     flexDirection: 'row',
-    backgroundColor: theme.card, 
-    padding: 16, 
-    marginBottom: 16, 
-    borderRadius: 16, 
-    borderWidth: 1, 
+    backgroundColor: theme.card,
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 16,
+    borderWidth: 1,
     borderColor: theme.border,
     alignItems: 'center',
     elevation: 3,

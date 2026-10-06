@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useSeason } from '../contexts/SeasonContext';
 import { Plus, Edit2, Shield, User } from 'lucide-react';
 import { API_URL } from '../config';
 
 export default function Agents() {
   const { token } = useAuth();
+  const { currentTheme } = useSeason();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -87,7 +89,7 @@ export default function Agents() {
           </div>
           <button 
             onClick={() => openModal()}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f0c330', color: '#1a0d05', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: currentTheme.buttonGradient, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
           >
             <Plus size={18} /> Add Agent
           </button>
@@ -107,7 +109,7 @@ export default function Agents() {
                 <tr key={user.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                   <td style={{ padding: '16px 24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: currentTheme.badgeBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentTheme.primary }}>
                         <User size={18} />
                       </div>
                       <span style={{ fontWeight: 600, color: '#1f2937' }}>{user.username}</span>
@@ -117,7 +119,7 @@ export default function Agents() {
                     {user.assigned_societies && user.assigned_societies.length > 0 ? (
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {user.assigned_societies.map(soc => (
-                          <span key={soc} style={{ background: 'rgba(240,195,48,0.15)', color: '#b48a12', padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{soc}</span>
+                          <span key={soc} style={{ background: currentTheme.badgeBg, color: currentTheme.badgeTextColor, padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{soc}</span>
                         ))}
                       </div>
                     ) : (
@@ -125,7 +127,7 @@ export default function Agents() {
                     )}
                   </td>
                   <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                    <button onClick={() => openModal(user)} style={{ background: 'transparent', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: 8 }}>
+                    <button onClick={() => openModal(user)} style={{ background: 'transparent', border: 'none', color: currentTheme.primary, cursor: 'pointer', padding: 8 }}>
                       <Edit2 size={16} />
                     </button>
                   </td>
@@ -177,7 +179,7 @@ export default function Agents() {
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
                 <button type="button" onClick={() => setModalOpen(false)} style={{ flex: 1, padding: 12, background: '#f3f4f6', border: 'none', borderRadius: 8, fontWeight: 600, color: '#4b5563', cursor: 'pointer' }}>Cancel</button>
-                <button type="submit" style={{ flex: 1, padding: 12, background: '#1a0d05', border: 'none', borderRadius: 8, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>Save Agent</button>
+                <button type="submit" style={{ flex: 1, padding: 12, background: currentTheme.buttonGradient, border: 'none', borderRadius: 8, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>Save Agent</button>
               </div>
             </form>
           </div>

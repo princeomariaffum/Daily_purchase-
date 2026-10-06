@@ -37,12 +37,12 @@ export default function Layout({ children, title, onRefresh }) {
         {/* Logo */}
         <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div 
+            <img 
+              src="/kuapa-logo.png" 
+              alt="Logo" 
               className="theme-transition"
-              style={{ width: 42, height: 42, background: currentTheme.logoGradient, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 20, color: '#fff', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
-            >
-              K
-            </div>
+              style={{ width: 42, height: 42, objectFit: 'contain', flexShrink: 0 }}
+            />
             <div>
               <p style={{ color: '#fff', fontWeight: 700, fontSize: 15, lineHeight: 1.1 }}>Kuapa Kokoo</p>
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 4 }}>Admin Portal</p>

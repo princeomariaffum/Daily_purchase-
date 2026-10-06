@@ -2,11 +2,16 @@ import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts';
-
-const COLORS = ['#f0c330', '#4a2511', '#8b5a2b', '#d97706', '#059669'];
+import { useSeason } from '../contexts/SeasonContext';
 
 // ---- Kilos Trend (Area Chart) ----
 export function KilosTrendChart({ sessions }) {
+  const { currentTheme } = useSeason();
+  const strokeColor = currentTheme?.chartLine || '#059669';
+  const gradColor = currentTheme?.chartGradientStart || '#34d399';
+  const tooltipBg = currentTheme?.primaryDark || '#064e3b';
+  const tooltipAccent = currentTheme?.activeNavText || '#34d399';
+
   const data = sessions
     .slice()
     .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
@@ -23,19 +28,19 @@ export function KilosTrendChart({ sessions }) {
       <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="kilosGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor="#f0c330" stopOpacity={0.35}/>
-            <stop offset="95%" stopColor="#f0c330" stopOpacity={0}/>
+            <stop offset="5%"  stopColor={gradColor} stopOpacity={0.35}/>
+            <stop offset="95%" stopColor={gradColor} stopOpacity={0}/>
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f3ede8" vertical={false}/>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
         <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false}/>
         <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={45}/>
         <Tooltip
-          contentStyle={{ background: '#1a0d05', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13 }}
-          labelStyle={{ color: '#f0c330', fontWeight: 700 }}
+          contentStyle={{ background: tooltipBg, border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, boxShadow: '0 8px 20px rgba(0,0,0,0.2)' }}
+          labelStyle={{ color: tooltipAccent, fontWeight: 700 }}
           formatter={(v) => [`${v} kg`, 'Kilos']}
         />
-        <Area type="monotone" dataKey="kilos" stroke="#f0c330" strokeWidth={2.5} fill="url(#kilosGrad)" dot={{ fill: '#f0c330', r: 4 }}/>
+        <Area type="monotone" dataKey="kilos" stroke={strokeColor} strokeWidth={2.5} fill="url(#kilosGrad)" dot={{ fill: strokeColor, r: 4 }}/>
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -43,6 +48,12 @@ export function KilosTrendChart({ sessions }) {
 
 // ---- Amount per Session (Bar Chart) ----
 export function AmountBarChart({ sessions }) {
+  const { currentTheme } = useSeason();
+  const bar1 = currentTheme?.chartBar1 || '#064e3b';
+  const bar2 = currentTheme?.chartBar2 || '#059669';
+  const tooltipBg = currentTheme?.primaryDark || '#064e3b';
+  const tooltipAccent = currentTheme?.activeNavText || '#34d399';
+
   const data = sessions
     .slice(-8)
     .map(s => ({
@@ -55,18 +66,18 @@ export function AmountBarChart({ sessions }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }} barSize={28}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f3ede8" vertical={false}/>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
         <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false}/>
         <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={55}
           tickFormatter={v => `₵${v.toLocaleString()}`}
         />
         <Tooltip
-          contentStyle={{ background: '#1a0d05', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13 }}
-          labelStyle={{ color: '#f0c330', fontWeight: 700 }}
+          contentStyle={{ background: tooltipBg, border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, boxShadow: '0 8px 20px rgba(0,0,0,0.2)' }}
+          labelStyle={{ color: tooltipAccent, fontWeight: 700 }}
           formatter={(v) => [`₵${v.toLocaleString()}`, 'Amount']}
         />
         <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
-          {data.map((_, i) => <Cell key={i} fill={i % 2 === 0 ? '#4a2511' : '#8b5a2b'}/>)}
+          {data.map((_, i) => <Cell key={i} fill={i % 2 === 0 ? bar1 : bar2}/>)}
         </Bar>
       </BarChart>
     </ResponsiveContainer>
@@ -75,6 +86,10 @@ export function AmountBarChart({ sessions }) {
 
 // ---- Farmer Status (Pie Chart) ----
 export function FarmerStatusPie({ records }) {
+  const { currentTheme } = useSeason();
+  const pieColors = currentTheme?.pieColors || ['#059669', '#34d399', '#10b981', '#0d9488'];
+  const tooltipBg = currentTheme?.primaryDark || '#064e3b';
+
   const existing = records.filter(r => r.farmer_status === 'Existing').length;
   const newF     = records.filter(r => r.farmer_status === 'New').length;
   const data = [
@@ -91,10 +106,10 @@ export function FarmerStatusPie({ records }) {
           paddingAngle={4} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
           labelLine={false}
         >
-          {data.map((_, i) => <Cell key={i} fill={COLORS[i]}/>)}
+          {data.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]}/>)}
         </Pie>
         <Tooltip
-          contentStyle={{ background: '#1a0d05', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13 }}
+          contentStyle={{ background: tooltipBg, border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, boxShadow: '0 8px 20px rgba(0,0,0,0.2)' }}
           formatter={(v, n) => [v, n]}
         />
         <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: '#6b7280' }}/>

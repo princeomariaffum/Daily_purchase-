@@ -13,7 +13,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-hy-#v_q*0*++q#hu*@g1w
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'spider.thecloudwebhosts.com']
 
 CORS_ALLOW_ALL_ORIGINS = True
 

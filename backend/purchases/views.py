@@ -16,6 +16,8 @@ from .serializers import (
     DeliveryUpdateSerializer, PurchaseSessionSerializer, PurchaseRecordSerializer, UserSerializer
 )
 
+from .gender_detector import detect_gender
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('username')
     serializer_class = UserSerializer
@@ -244,7 +246,7 @@ class FarmerViewSet(viewsets.ModelViewSet):
                         'district_society': district_obj,
                         'zone_fk': zone_obj,
                         'name': safe_get('member') or safe_get('first_name') or 'Unknown Farmer',
-                        'gender': safe_get('gender'),
+                        'gender': safe_get('gender') if safe_get('gender') in ['Male', 'Female'] else detect_gender(safe_get('member') or safe_get('first_name') or ''),
                         'phone_numbers': safe_get('phonenumbers') or safe_get('contact'),
                         'contact': safe_get('phonenumbers') or safe_get('contact'),
                         'id_card_number': safe_get('idcardnumber') or safe_get('gh_card'),

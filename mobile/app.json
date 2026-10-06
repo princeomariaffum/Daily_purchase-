@@ -7,11 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kuapa",
     "userInterfaceStyle": "light",
-    "sdkVersion": "54.0.0",
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#4a2511"
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#085a1e"
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
@@ -31,6 +30,24 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Kuapa Kokoo to use your location to tag cocoa purchase sessions."
+        }
+      ],
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#085a1e"
         }
       ]
     ],

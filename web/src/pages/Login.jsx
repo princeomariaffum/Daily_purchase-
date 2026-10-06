@@ -25,7 +25,7 @@ export default function Login() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', background: 'linear-gradient(135deg, #4a2511 0%, #2c1508 50%, #1a0d05 100%)', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', background: 'linear-gradient(135deg, #0f5a1f 0%, #083311 100%)', position: 'relative', overflow: 'hidden' }}>
 
       {/* Background decorative circles */}
       <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(240,195,48,0.08)', top: -100, right: -100 }}/>
@@ -34,7 +34,7 @@ export default function Login() {
       {/* Left Branding Panel */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 80px', position: 'relative' }} className="hidden lg:flex">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 48 }}>
-          <div style={{ width: 48, height: 48, background: '#f0c330', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 20, color: '#4a2511' }}>K</div>
+          <img src="/kuapa-logo.png" alt="Logo" style={{ width: 48, height: 48, objectFit: 'contain' }} />
           <span style={{ color: '#fff', fontWeight: 700, fontSize: 20 }}>Kuapa Kokoo</span>
         </div>
         <h1 style={{ color: '#fff', fontSize: 44, fontWeight: 800, lineHeight: 1.2, marginBottom: 20 }}>
@@ -58,7 +58,7 @@ export default function Login() {
       <div style={{ width: '100%', maxWidth: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
         <div style={{ background: 'rgba(255,255,255,0.97)', borderRadius: 24, padding: '40px 36px', width: '100%', boxShadow: '0 25px 80px rgba(0,0,0,0.4)' }} className="animate-fade-in">
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{ width: 64, height: 64, background: 'linear-gradient(135deg, #f0c330, #d4a017)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 8px 24px rgba(240,195,48,0.4)', fontWeight: 900, fontSize: 26, color: '#4a2511' }}>K</div>
+            <img src="/kuapa-logo.png" alt="Logo" style={{ width: 64, height: 64, objectFit: 'contain', margin: '0 auto 16px' }} />
             <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1f2937', margin: 0 }}>Welcome back</h2>
             <p style={{ color: '#9ca3af', fontSize: 14, marginTop: 6 }}>Sign in to your admin account</p>
           </div>
@@ -79,7 +79,7 @@ export default function Login() {
                 onChange={e => setUsername(e.target.value)}
                 required
                 style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e5e7eb', borderRadius: 10, fontSize: 15, outline: 'none', transition: 'border-color 0.2s', fontFamily: 'Inter, sans-serif' }}
-                onFocus={e => e.target.style.borderColor='#4a2511'}
+                onFocus={e => e.target.style.borderColor='#0f5a1f'}
                 onBlur={e => e.target.style.borderColor='#e5e7eb'}
               />
             </div>
@@ -92,14 +92,14 @@ export default function Login() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e5e7eb', borderRadius: 10, fontSize: 15, outline: 'none', transition: 'border-color 0.2s', fontFamily: 'Inter, sans-serif' }}
-                onFocus={e => e.target.style.borderColor='#4a2511'}
+                onFocus={e => e.target.style.borderColor='#0f5a1f'}
                 onBlur={e => e.target.style.borderColor='#e5e7eb'}
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              style={{ marginTop: 8, padding: '14px', background: loading ? '#9ca3af' : 'linear-gradient(135deg, #4a2511, #6b3a1f)', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 4px 16px rgba(74,37,17,0.35)', fontFamily: 'Inter, sans-serif' }}
+              style={{ marginTop: 8, padding: '14px', background: loading ? '#9ca3af' : 'linear-gradient(135deg, #0f5a1f, #083311)', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 4px 16px rgba(15,90,31,0.35)', fontFamily: 'Inter, sans-serif' }}
             >
               {loading ? 'Signing in…' : 'Sign in →'}
             </button>

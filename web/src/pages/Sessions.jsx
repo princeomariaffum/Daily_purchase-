@@ -59,11 +59,11 @@ export default function Sessions() {
             disabled={sessions.length === 0}
             style={{ 
               display: 'flex', alignItems: 'center', gap: 8, 
-              background: sessions.length === 0 ? '#e5e7eb' : '#22c55e', 
+              background: sessions.length === 0 ? '#e5e7eb' : currentTheme.buttonGradient, 
               color: sessions.length === 0 ? '#9ca3af' : '#fff', 
               border: 'none', padding: '10px 20px', borderRadius: 8, 
               fontWeight: 600, cursor: sessions.length === 0 ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s', boxShadow: sessions.length > 0 ? '0 2px 8px rgba(0,0,0,0.12)' : 'none'
             }}
           >
             <Download size={18} /> Export to Excel
@@ -86,7 +86,7 @@ export default function Sessions() {
               {sessions.map(session => (
                 <React.Fragment key={session.id}>
                   <tr 
-                    style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer', background: expandedRow === session.id ? '#fdf8ec' : '#fff' }}
+                    style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer', background: expandedRow === session.id ? (currentTheme.dateBadgeBg || '#fdf8ec') : '#fff' }}
                     onClick={() => toggleRow(session.id)}
                   >
                     <td style={{ padding: '16px 12px', textAlign: 'center', color: '#9ca3af' }}>
@@ -94,7 +94,7 @@ export default function Sessions() {
                     </td>
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <FileText size={16} color="#d4a017" />
+                        <FileText size={16} color={currentTheme.primary} />
                         <span style={{ fontWeight: 600, color: '#1f2937' }}>{session.waybill_no || 'N/A'}</span>
                       </div>
                     </td>
@@ -109,7 +109,7 @@ export default function Sessions() {
                       <span style={{ fontWeight: 700, color: '#1f2937' }}>{parseFloat(session.total_kilos || 0).toFixed(2)} kg</span>
                     </td>
                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                      <span style={{ fontWeight: 700, color: '#059669' }}>₵{parseFloat(session.total_amount || 0).toFixed(2)}</span>
+                      <span style={{ fontWeight: 700, color: currentTheme.primary }}>₵{parseFloat(session.total_amount || 0).toFixed(2)}</span>
                     </td>
                   </tr>
                   

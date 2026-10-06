@@ -10,6 +10,7 @@ import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useSeason } from '../contexts/SeasonContext';
 import { exportFarmerStatementPdf } from '../utils/exportFarmerStatement';
+import { detectGender, getGenderDistribution } from '../utils/genderDetector';
 import { API_URL } from '../config';
 import FarmMapModal from '../components/FarmMapModal';
 
@@ -329,6 +330,30 @@ export default function Farmers() {
             </button>
           </div>
         </div>
+
+        {/* Gender Demographics Summary Bar */}
+        {(() => {
+          const genderDist = getGenderDistribution(farmers);
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
+              <div style={{ background: '#fff', padding: '16px 20px', borderRadius: 14, border: '1px solid #ede8e2', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>👨 Male Farmers</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 800, color: '#1e293b' }}>{genderDist.male} <span style={{ fontSize: 12, color: '#2563eb', fontWeight: 700 }}>({genderDist.malePercent}%)</span></p>
+                </div>
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 20 }}>👨</div>
+              </div>
+
+              <div style={{ background: '#fff', padding: '16px 20px', borderRadius: 14, border: '1px solid #ede8e2', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>👩 Female Farmers</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 800, color: '#1e293b' }}>{genderDist.female} <span style={{ fontSize: 12, color: '#db2777', fontWeight: 700 }}>({genderDist.femalePercent}%)</span></p>
+                </div>
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: '#fce7f3', color: '#db2777', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 20 }}>👩</div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Farmers Table */}
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #ede8e2', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
@@ -834,9 +859,44 @@ export default function Farmers() {
             </div>
 
             <form onSubmit={handleAddFarmerSubmit} style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '80vh', overflowY: 'auto' }}>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Full Name *</label>
-                <input required type="text" value={farmerForm.name} onChange={e => setFarmerForm({...farmerForm, name: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14 }} placeholder="e.g. Kwame Mensah" />
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Full Name *</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={farmerForm.name} 
+                    onChange={e => {
+                      const val = e.target.value;
+                      const det = detectGender(val);
+                      setFarmerForm(prev => ({
+                        ...prev,
+                        name: val,
+                        gender: det.gender !== 'Unknown' ? det.gender : prev.gender,
+                        autoGenderDetected: det.gender !== 'Unknown' ? det : null
+                      }));
+                    }} 
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14 }} 
+                    placeholder="e.g. Akosua Mansah or Kwame Mensah" 
+                  />
+                  {farmerForm.autoGenderDetected && (
+                    <span style={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                      ✨ Auto-identified: <strong>{farmerForm.autoGenderDetected.gender}</strong> (matched "{farmerForm.autoGenderDetected.matchedName}")
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Gender</label>
+                  <select 
+                    value={farmerForm.gender || 'Male'} 
+                    onChange={e => setFarmerForm({...farmerForm, gender: e.target.value, autoGenderDetected: null})} 
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14, fontWeight: 600, background: '#fff' }}
+                  >
+                    <option value="Male">👨 Male</option>
+                    <option value="Female">👩 Female</option>
+                  </select>
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -910,9 +970,43 @@ export default function Farmers() {
             </div>
 
             <form onSubmit={handleEditFarmerSubmit} style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '80vh', overflowY: 'auto' }}>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Full Name *</label>
-                <input required type="text" value={farmerForm.name} onChange={e => setFarmerForm({...farmerForm, name: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14 }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Full Name *</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={farmerForm.name} 
+                    onChange={e => {
+                      const val = e.target.value;
+                      const det = detectGender(val);
+                      setFarmerForm(prev => ({
+                        ...prev,
+                        name: val,
+                        gender: det.gender !== 'Unknown' ? det.gender : prev.gender,
+                        autoGenderDetected: det.gender !== 'Unknown' ? det : null
+                      }));
+                    }} 
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14 }} 
+                  />
+                  {farmerForm.autoGenderDetected && (
+                    <span style={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                      ✨ Auto-identified: <strong>{farmerForm.autoGenderDetected.gender}</strong>
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Gender</label>
+                  <select 
+                    value={farmerForm.gender || 'Male'} 
+                    onChange={e => setFarmerForm({...farmerForm, gender: e.target.value, autoGenderDetected: null})} 
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14, fontWeight: 600, background: '#fff' }}
+                  >
+                    <option value="Male">👨 Male</option>
+                    <option value="Female">👩 Female</option>
+                  </select>
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

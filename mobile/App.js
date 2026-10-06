@@ -8,12 +8,18 @@ import Outbox from './src/components/Outbox';
 import FarmerDirectory from './src/components/FarmerDirectory';
 import LoginScreen from './src/components/LoginScreen';
 import { lightTheme, darkTheme } from './src/utils/theme';
+import AnimatedSplash from './src/components/AnimatedSplash';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Keep the native splash visible until our animated splash is mounted.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('FORM');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
   const [selectedFarmerForEntry, setSelectedFarmerForEntry] = useState(null);
+  const [showSplash, setShowSplash] = useState(true);
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -35,6 +41,11 @@ export default function App() {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    // Hand over from the native splash to the animated one.
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
+
   const handleGuestLogin = async () => {
     await AsyncStorage.setItem('@is_guest', 'true');
     setIsGuest(true);
@@ -52,6 +63,10 @@ export default function App() {
     setSelectedFarmerForEntry(farmer);
     setActiveTab('FORM');
   };
+
+  if (showSplash) {
+    return <AnimatedSplash onFinish={() => setShowSplash(false)} />;
+  }
 
   if (!isAuthenticated) {
     return (

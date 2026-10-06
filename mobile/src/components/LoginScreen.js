@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,6 +10,7 @@ export default function LoginScreen({ onLoginSuccess, onGuestLogin, theme }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -40,9 +41,7 @@ export default function LoginScreen({ onLoginSuccess, onGuestLogin, theme }) {
       style={styles.container}
     >
       <View style={styles.card}>
-        <View style={styles.logoBox}>
-          <Text style={styles.logoText}>K</Text>
-        </View>
+        <Image source={require('../../assets/images/kuapa-logo.png')} style={styles.logoImage} resizeMode="contain" />
         <Text style={styles.title}>Kuapa Kokoo</Text>
         <Text style={styles.subtitle}>Field Data Collection</Text>
         
@@ -66,8 +65,17 @@ export default function LoginScreen({ onLoginSuccess, onGuestLogin, theme }) {
             placeholderTextColor={theme.textSecondary}
             value={password} 
             onChangeText={setPassword} 
-            secureTextEntry
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
+          <TouchableOpacity
+            onPress={() => setShowPassword(prev => !prev)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+          >
+            <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color={theme.textSecondary} />
+          </TouchableOpacity>
         </View>
         
         {loading ? (
@@ -117,6 +125,7 @@ const getStyles = (theme) => StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 20
   },
+  logoImage: { width: 96, height: 96, borderRadius: 22, alignSelf: 'center', marginBottom: 16 },
   logoBox: { 
     width: 80, 
     height: 80, 

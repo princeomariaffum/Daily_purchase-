@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 import uuid
+from purchases.gender_detector import detect_gender
 
 class Region(models.Model):
     region_name = models.CharField(max_length=150, unique=True)
@@ -106,6 +107,8 @@ class Farmer(models.Model):
             self.society = self.district_society.district_name
         if self.zone_fk and not self.zone:
             self.zone = self.zone_fk.zone_name
+        if not self.gender or self.gender in ['N/A', 'Unknown', '']:
+            self.gender = detect_gender(self.name or f"{self.first_name} {self.last_name}")
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -200,6 +203,7 @@ class PurchaseSession(models.Model):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
+    client_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     
     @property
     def total_kilos(self):

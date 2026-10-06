@@ -64,21 +64,21 @@ export default function Dashboard() {
 
         {/* Stat Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 18 }}>
-          <StatCard loading={loading} label="Total Kilos" value={`${totalKilos.toFixed(2)} kg`}   sub="Gross cocoa weight"    icon={<Activity size={20}/>}    iconBg="#fef3c7" iconColor="#d97706" trend="+12% this week"/>
-          <StatCard loading={loading} label="Total Bags"  value={totalBags.toFixed(1)}             sub="@ 62.5 kg / bag"       icon={<Package size={20}/>}     iconBg="#ede9fe" iconColor="#7c3aed" trend="From all sessions"/>
-          <StatCard loading={loading} label="GHC Amount"  value={formatCurrency(totalAmount)}       sub="Total paid to farmers" icon={<DollarSign size={20}/>}  iconBg="#d1fae5" iconColor="#059669" trend="Cumulative"/>
-          <StatCard loading={loading} label="Farmers"     value={uniqueFarmers}                     sub="Unique registered"     icon={<Users size={20}/>}       iconBg="#dbeafe" iconColor="#2563eb" trend="Across all waybills"/>
+          <StatCard loading={loading} label="Total Kilos" value={`${totalKilos.toFixed(2)} kg`}   sub="Gross cocoa weight"    icon={<Activity size={20}/>}    iconBg={currentTheme.statCards.kilos.bg} iconColor={currentTheme.statCards.kilos.color} trend="+12% this week"/>
+          <StatCard loading={loading} label="Total Bags"  value={totalBags.toFixed(1)}             sub="@ 62.5 kg / bag"       icon={<Package size={20}/>}     iconBg={currentTheme.statCards.bags.bg} iconColor={currentTheme.statCards.bags.color} trend="From all sessions"/>
+          <StatCard loading={loading} label="GHC Amount"  value={formatCurrency(totalAmount)}       sub="Total paid to farmers" icon={<DollarSign size={20}/>}  iconBg={currentTheme.statCards.amount.bg} iconColor={currentTheme.statCards.amount.color} trend="Cumulative"/>
+          <StatCard loading={loading} label="Farmers"     value={uniqueFarmers}                     sub="Unique registered"     icon={<Users size={20}/>}       iconBg={currentTheme.statCards.farmers.bg} iconColor={currentTheme.statCards.farmers.color} trend="Across all waybills"/>
         </div>
 
         {/* Charts Row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 18 }}>
-          <ChartCard title="Kilos Trend" subtitle="Cumulative weight over sessions" icon={<Activity size={16}/>}>
+          <ChartCard title="Kilos Trend" subtitle="Cumulative weight over sessions" icon={<Activity size={16}/>} themeColor={currentTheme.primary}>
             <KilosTrendChart sessions={sessions}/>
           </ChartCard>
-          <ChartCard title="GHC by Waybill" subtitle="Last 8 sessions" icon={<DollarSign size={16}/>}>
+          <ChartCard title="GHC by Waybill" subtitle="Last 8 sessions" icon={<DollarSign size={16}/>} themeColor={currentTheme.primary}>
             <AmountBarChart sessions={sessions}/>
           </ChartCard>
-          <ChartCard title="Farmer Status" subtitle="Existing vs. new farmers" icon={<Users size={16}/>}>
+          <ChartCard title="Farmer Status" subtitle="Existing vs. new farmers" icon={<Users size={16}/>} themeColor={currentTheme.primary}>
             <FarmerStatusPie records={records}/>
           </ChartCard>
         </div>
@@ -91,13 +91,13 @@ export default function Dashboard() {
               <p style={{ margin: 0, fontSize: 13, color: '#9ca3af', marginTop: 3 }}>{sessions.length} waybill{sessions.length !== 1 ? 's' : ''} on record</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ background: '#fef9ec', border: '1px solid #f0c330', color: '#92400e', padding: '4px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+              <span style={{ background: currentTheme.dateBadgeBg, border: `1px solid ${currentTheme.dateBadgeBorder}`, color: currentTheme.dateBadgeText, padding: '4px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
                 {new Date().toLocaleDateString('en-GH', { month: 'short', day: 'numeric' })}
               </span>
               <button
                 onClick={() => exportSessionsToExcel(sessions)}
                 disabled={sessions.length === 0}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', background: sessions.length === 0 ? '#f3f4f6' : 'linear-gradient(135deg, #4a2511, #6b3a1f)', color: sessions.length === 0 ? '#9ca3af' : '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: sessions.length === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: sessions.length === 0 ? '#f3f4f6' : currentTheme.buttonGradient, color: sessions.length === 0 ? '#9ca3af' : '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: sessions.length === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: sessions.length > 0 ? '0 2px 8px rgba(0,0,0,0.12)' : 'none' }}
               >
                 <Download size={14}/>
                 Export Excel
@@ -138,16 +138,16 @@ export default function Dashboard() {
                     onMouseEnter={e => e.currentTarget.style.background = '#fdf9f6'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <td style={{ padding: '15px 20px' }}>
-                      <span style={{ background: '#fef3c7', color: '#92400e', padding: '3px 10px', borderRadius: 6, fontSize: 13, fontWeight: 700, fontFamily: 'monospace' }}>{s.waybill_no}</span>
+                      <span style={{ background: currentTheme.waybillBadgeBg, color: currentTheme.waybillBadgeText, padding: '3px 10px', borderRadius: 6, fontSize: 13, fontWeight: 700, fontFamily: 'monospace' }}>{s.waybill_no}</span>
                     </td>
                     <td style={{ padding: '15px 20px', fontWeight: 600, color: '#111827', fontSize: 14 }}>{s.society_district_name}</td>
                     <td style={{ padding: '15px 20px', color: '#6b7280', fontSize: 13 }}>{s.zone_name || '—'}</td>
                     <td style={{ padding: '15px 20px', color: '#6b7280', fontSize: 13 }}>{s.dprs_number || <span style={{ color: '#e5e7eb' }}>—</span>}</td>
                     <td style={{ padding: '15px 20px', textAlign: 'center' }}>
-                      <span style={{ background: '#eff6ff', color: '#2563eb', padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{s.records?.length ?? 0}</span>
+                      <span style={{ background: currentTheme.badgeBg, color: currentTheme.badgeTextColor, padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{s.records?.length ?? 0}</span>
                     </td>
                     <td style={{ padding: '15px 20px', fontWeight: 600, color: '#374151', fontSize: 14 }}>{(s.total_kilos || 0).toFixed(2)} kg</td>
-                    <td style={{ padding: '15px 20px', fontWeight: 700, color: '#059669', fontSize: 14 }}>{formatCurrency(s.total_amount)}</td>
+                    <td style={{ padding: '15px 20px', fontWeight: 700, color: currentTheme.primary, fontSize: 14 }}>{formatCurrency(s.total_amount)}</td>
                     <td style={{ padding: '15px 20px', color: '#9ca3af', fontSize: 13 }}>{formatDate(s.created_at)}</td>
                   </tr>
                 ))}
@@ -183,11 +183,11 @@ function StatCard({ label, value, sub, icon, iconBg, iconColor, trend, loading }
   );
 }
 
-function ChartCard({ title, subtitle, icon, children }) {
+function ChartCard({ title, subtitle, icon, themeColor, children }) {
   return (
     <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #ede8e2', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
       <div style={{ padding: '18px 20px 12px', borderBottom: '1px solid #f7f2ee', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ color: '#8b5a2b' }}>{icon}</div>
+        <div style={{ color: themeColor || '#059669' }}>{icon}</div>
         <div>
           <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#111827' }}>{title}</p>
           <p style={{ margin: 0, fontSize: 11, color: '#9ca3af' }}>{subtitle}</p>
