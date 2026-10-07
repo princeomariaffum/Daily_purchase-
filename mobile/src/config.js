@@ -1,3 +1,3 @@
 // Network LAN API Configuration for Mobile (Expo)
-export const API_URL = 'https://cocoapurchaseapp.cyhoracorelab.com/api';
+export const API_URL = 'https://api.cyhoracorelab.com/api';
 
