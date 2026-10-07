@@ -131,6 +131,9 @@ class PurchaseSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchaseSession
         fields = '__all__'
+        extra_kwargs = {
+            'client_id': {'validators': []}
+        }
 
     def create(self, validated_data):
         records_data = validated_data.pop('records', [])
