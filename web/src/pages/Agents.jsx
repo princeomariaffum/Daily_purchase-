@@ -25,10 +25,10 @@ export default function Agents() {
       const res = await axios.get(`${API_URL}/users/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(res.data);
+      setUsers(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
-      console.error(e);
-      alert('Failed to load users');
+      console.error('Error fetching users:', e);
+      setUsers([]);
     } finally {
       setLoading(false);
     }

@@ -29,11 +29,12 @@ export default function Reports() {
         axios.get(`${API_URL}/records/`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
-      setAllSessions(resSess.data);
-      setAllRecords(resRec.data);
+      setAllSessions(Array.isArray(resSess.data) ? resSess.data : []);
+      setAllRecords(Array.isArray(resRec.data) ? resRec.data : []);
     } catch (e) {
-      console.error(e);
-      alert('Failed to load report data');
+      console.error('Error fetching report data:', e);
+      setAllSessions([]);
+      setAllRecords([]);
     } finally {
       setLoading(false);
     }
