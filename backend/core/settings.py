@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-hy-#v_q*0*++q#hu*@g1w40wjgccj%l4rb!gde5_$dygzzepqu')
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'api.cyhoracorelab.com', 'spider.thecloudwebhosts.com']
 
