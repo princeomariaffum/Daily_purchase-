@@ -21,10 +21,10 @@ export default function Sessions() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setAllSessions(res.data);
+      setAllSessions(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
-      console.error(e);
-      alert('Failed to load sessions');
+      console.error('Error fetching sessions:', e);
+      setAllSessions([]);
     } finally {
       setLoading(false);
     }
