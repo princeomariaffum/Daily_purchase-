@@ -427,6 +427,89 @@ if (strpos($path, 'farms') === 0) {
     }
 }
 
+// Sessions List & Create
+if (strpos($path, 'sessions') === 0) {
+    if ($method === 'GET') {
+        $stmt = $pdo->query("SELECT * FROM purchase_sessions ORDER BY created_at DESC");
+        $sessions = $stmt->fetchAll();
+        foreach ($sessions as &$sess) {
+            $stmtRec = $pdo->prepare("SELECT * FROM purchase_records WHERE session_id = ?");
+            $stmtRec->execute([$sess['id']]);
+            $recs = $stmtRec->fetchAll();
+            $sess['records'] = $recs;
+            
+            $totK = 0.0; $totB = 0.0; $totA = 0.0;
+            foreach ($recs as $r) {
+                $totK += (float)($r['kilos'] ?? 0);
+                $totB += (float)($r['bags'] ?? 0);
+                $totA += (float)($r['net_amount'] ?? 0);
+            }
+            $sess['total_kilos'] = $totK;
+            $sess['total_bags'] = $totB;
+            $sess['total_amount'] = $totA;
+        }
+        echo json_encode($sessions);
+        exit();
+    }
+
+    if ($method === 'POST') {
+        $client_id = $input['client_id'] ?? ('CLIENT-' . uniqid());
+        $officer = $input['officer_name'] ?? 'Field Officer';
+        $dprs = $input['dprs_number'] ?? ('DPR-' . rand(1000, 9999));
+        $waybill = $input['waybill_no'] ?? ('WAY-' . rand(1000, 9999));
+        $season = $input['cocoa_season'] ?? '2025/2026';
+        $society = $input['society'] ?? 'Offinso Central';
+        $recordsData = $input['records'] ?? [];
+
+        $stmt = $pdo->prepare("INSERT INTO purchase_sessions (client_id, officer_name, dprs_number, waybill_no, cocoa_season, society) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$client_id, $officer, $dprs, $waybill, $season, $society]);
+        $sessionId = $pdo->lastInsertId();
+
+        foreach ($recordsData as $rec) {
+            $rStmt = $pdo->prepare("INSERT INTO purchase_records (session_id, date, farmer_name, kk_id, kilos, bags, gross_amount, net_amount, bonus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $rStmt->execute([
+                $sessionId,
+                $rec['date'] ?? date('Y-m-d'),
+                $rec['farmer_name'] ?? 'Farmer',
+                $rec['kk_id'] ?? 'KK-001',
+                $rec['kilos'] ?? 62.5,
+                $rec['bags'] ?? 1.0,
+                $rec['gross_amount'] ?? 2083.33,
+                $rec['net_amount'] ?? 2083.33,
+                $rec['bonus'] ?? 70.0
+            ]);
+        }
+
+        $stmtGet = $pdo->prepare("SELECT * FROM purchase_sessions WHERE id = ?");
+        $stmtGet->execute([$sessionId]);
+        $sessObj = $stmtGet->fetch();
+        $sessObj['records'] = $recordsData;
+        echo json_encode($sessObj);
+        exit();
+    }
+}
+
+// Records List
+if (strpos($path, 'records') === 0) {
+    if ($method === 'GET') {
+        $stmt = $pdo->query("SELECT * FROM purchase_records ORDER BY date DESC");
+        echo json_encode($stmt->fetchAll());
+        exit();
+    }
+}
+
+// Officer Societies List
+if (strpos($path, 'officer-societies') === 0) {
+    echo json_encode([]);
+    exit();
+}
+
+// Delivery Updates List
+if (strpos($path, 'delivery-updates') === 0) {
+    echo json_encode([]);
+    exit();
+}
+
 // Deliveries & Purchases List & Create
 if (strpos($path, 'deliveries') === 0 || strpos($path, 'purchases') === 0) {
     if ($method === 'GET') {
@@ -463,3 +546,4 @@ if (strpos($path, 'deliveries') === 0 || strpos($path, 'purchases') === 0) {
 // Fallback 404 handler for unknown routes
 http_response_code(404);
 echo json_encode(["detail" => "Endpoint not found: " . $path]);
+
