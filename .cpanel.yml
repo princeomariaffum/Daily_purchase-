@@ -1,0 +1,9 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH_WEB=/home/cyhoraco/cocoapurchaseapp.cyhoracorelab.com
+    - export DEPLOYPATH_API=/home/cyhoraco/api.cyhoracorelab.com
+    - /bin/cp -R web/dist/* $DEPLOYPATH_WEB/
+    - /bin/cp web/dist/.htaccess $DEPLOYPATH_WEB/
+    - /bin/cp -R backend_php/* $DEPLOYPATH_API/
+    - /bin/cp backend_php/.htaccess $DEPLOYPATH_API/
