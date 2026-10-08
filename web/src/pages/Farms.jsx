@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { 
-  MapPin, Search, Filter, Layers, Compass, Loader2, Map, ShieldCheck, 
-  ChevronRight, RefreshCw, BarChart2, Award 
+import {
+  MapPin, Search, Filter, Layers, Compass, Loader2, Map, ShieldCheck,
+  ChevronRight, RefreshCw, BarChart2, Award
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
@@ -68,7 +68,7 @@ export default function Farms() {
 
   const filteredFarms = farms.filter(f => {
     const search = searchTerm.toLowerCase();
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       (f.farmer_name || '').toLowerCase().includes(search) ||
       (f.cocobod_id || '').toLowerCase().includes(search) ||
       (f.district_name || '').toLowerCase().includes(search);
@@ -100,7 +100,7 @@ export default function Farms() {
   return (
     <Layout>
       <div style={{ padding: '24px 32px', maxWidth: 1440, margin: '0 auto' }}>
-        
+
         {/* Page Title Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
           <div>
@@ -117,7 +117,7 @@ export default function Farms() {
             </p>
           </div>
 
-          <button 
+          <button
             onClick={fetchFarmsData}
             style={{
               display: 'flex',
@@ -181,7 +181,7 @@ export default function Farms() {
         <div style={{ background: '#ffffff', padding: 18, borderRadius: 16, border: '1px solid #f3ede8', marginBottom: 24, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 260, position: 'relative' }}>
             <Search size={18} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-            <input 
+            <input
               type="text"
               placeholder="Search by farmer name, COCOBOD ID, or district..."
               value={searchTerm}
@@ -199,7 +199,7 @@ export default function Farms() {
           </div>
 
           {/* Region Filter */}
-          <select 
+          <select
             value={selectedRegion}
             onChange={e => setSelectedRegion(e.target.value)}
             style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 13, background: '#fff', fontWeight: 600, color: '#374151' }}
@@ -209,7 +209,7 @@ export default function Farms() {
           </select>
 
           {/* District Filter */}
-          <select 
+          <select
             value={selectedDistrict}
             onChange={e => setSelectedDistrict(e.target.value)}
             style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 13, background: '#fff', fontWeight: 600, color: '#374151' }}
@@ -219,7 +219,7 @@ export default function Farms() {
           </select>
 
           {/* Zone Filter */}
-          <select 
+          <select
             value={selectedZone}
             onChange={e => setSelectedZone(e.target.value)}
             style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 13, background: '#fff', fontWeight: 600, color: '#374151' }}
@@ -252,7 +252,7 @@ export default function Farms() {
               </thead>
               <tbody>
                 {paginatedFarms.map((farmItem, i) => (
-                  <tr 
+                  <tr
                     key={i}
                     style={{ borderBottom: '1px solid #faf7f4', transition: 'background 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#fdf9f6'}
@@ -326,14 +326,14 @@ export default function Farms() {
                 Showing <b>{((currentPage - 1) * pageSize) + 1}</b> to <b>{Math.min(currentPage * pageSize, filteredFarms.length)}</b> of <b>{filteredFarms.length}</b> farms
               </span>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button 
+                <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   style={{ padding: '6px 12px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 6, fontSize: 13, fontWeight: 600, color: currentPage === 1 ? '#9ca3af' : '#374151', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
                 >
                   Previous
                 </button>
-                <button 
+                <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   style={{ padding: '6px 12px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 6, fontSize: 13, fontWeight: 600, color: currentPage === totalPages ? '#9ca3af' : '#374151', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
@@ -347,7 +347,7 @@ export default function Farms() {
 
         {/* Map Modal */}
         {selectedFarm && (
-          <FarmMapModal 
+          <FarmMapModal
             farm={selectedFarm}
             farmer={selectedFarmer}
             onClose={() => {
